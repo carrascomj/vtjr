@@ -238,139 +238,138 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
     }
 
     return Scaffold(
-      backgroundColor:
-          isBlackBackground ? Colors.black : currentBackgroundColor,
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          // setState(() {
-          //   _selectNextWord(1);
-          // });
-          if (isBlackBackground) {
-            _resetView();
-          }
-        },
-        onHorizontalDragEnd: (details) {
-          setState(() {
-            if (details.primaryVelocity! != 0) {
-              _selectNextWord(1);
-            }
-          });
-        },
-        child: Center(
-          child: Text(
-            displayText,
-            style: TextStyle(
-              fontSize: 32,
-              color: isBlackBackground ? Colors.white : Colors.black,
+        backgroundColor:
+            isBlackBackground ? Colors.black : currentBackgroundColor,
+        body: Stack(
+          children: [
+            GestureDetector(
+              onTap: () {
+                if (isBlackBackground) {
+                  _resetView();
+                }
+              },
+              onHorizontalDragEnd: (details) {
+                setState(() {
+                  if (details.primaryVelocity! != 0) {
+                    _selectNextWord(1);
+                  }
+                });
+              },
+              child: Container(
+                color: Colors.transparent, // Ensure it covers the full area
+                child: Center(
+                  child: Text(
+                    displayText,
+                    style: TextStyle(
+                      fontSize: 32,
+                      color: isBlackBackground ? Colors.white : Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-      floatingActionButton: Stack(
-        children: <Widget>[
-          // Add Word Button
-          if (buttonVisibility['addWord']!)
+            // Add Word Button
+            if (buttonVisibility['addWord']!)
+              Positioned(
+                right: 20,
+                bottom: 20,
+                child: FloatingActionButton(
+                  heroTag: 'addWord',
+                  onPressed: () {
+                    _showAddWordDialog();
+                  },
+                  child: Icon(Icons.add),
+                  backgroundColor: Colors.white.withOpacity(0.5),
+                ),
+              ),
+            // Add Sentence Button
+            if (buttonVisibility['addSentence']!)
+              Positioned(
+                right: 20,
+                bottom: 90,
+                child: FloatingActionButton(
+                  heroTag: 'addSentence',
+                  onPressed: () {
+                    _showAddSentenceDialog();
+                  },
+                  child: Icon(Icons.edit),
+                  backgroundColor: Colors.white.withOpacity(0.5),
+                ),
+              ),
+            // Add Translation Button
+            if (buttonVisibility['addTranslation']!)
+              Positioned(
+                right: 20,
+                bottom: 160,
+                child: FloatingActionButton(
+                  heroTag: 'addTranslation',
+                  onPressed: () {
+                    _showAddTranslationDialog();
+                  },
+                  child: Icon(Icons.translate),
+                  backgroundColor: Colors.white.withOpacity(0.5),
+                ),
+              ),
+            // Show Translation Button
+            if (buttonVisibility['showTranslation']!)
+              Positioned(
+                right: 20,
+                top: 20,
+                child: FloatingActionButton(
+                  heroTag: 'showTranslation',
+                  onPressed: () {
+                    if (words[currentIndex].translation.isNotEmpty) {
+                      setState(() {
+                        showTranslation = true;
+                        showSentence = false;
+                        isBlackBackground = true;
+                        _incrementScore(3); // Increment score by +3
+                      });
+                    }
+                  },
+                  child: Icon(Icons.visibility),
+                  backgroundColor: Colors.white.withOpacity(0.5),
+                ),
+              ),
+            // Show Sentence Button
+            if (buttonVisibility['showSentence']!)
+              Positioned(
+                right: 20,
+                top: 90,
+                child: FloatingActionButton(
+                  heroTag: 'showSentence',
+                  onPressed: () {
+                    if (words[currentIndex].sentences.isNotEmpty) {
+                      setState(() {
+                        showSentence = true;
+                        showTranslation = false;
+                        isBlackBackground = true;
+                        _incrementScore(1); // Increment score by +1
+                        _advanceSentenceIndex();
+                      });
+                    }
+                  },
+                  child: Icon(Icons.more_horiz),
+                  backgroundColor: Colors.white.withOpacity(0.5),
+                ),
+              ),
+            // Settings Button
             Positioned(
-              right: 20,
+              left: 20,
               bottom: 20,
               child: FloatingActionButton(
-                heroTag: 'addWord',
+                heroTag: 'settings',
                 onPressed: () {
-                  _showAddWordDialog();
+                  _showSettingsDialog();
                 },
-                child: Icon(Icons.add),
+                child: const Icon(Icons.settings),
                 backgroundColor: Colors.white.withOpacity(0.5),
               ),
             ),
-          // Add Sentence Button
-          if (buttonVisibility['addSentence']!)
-            Positioned(
-              right: 20,
-              bottom: 90,
-              child: FloatingActionButton(
-                heroTag: 'addSentence',
-                onPressed: () {
-                  _showAddSentenceDialog();
-                },
-                child: Icon(Icons.edit),
-                backgroundColor: Colors.white.withOpacity(0.5),
-              ),
-            ),
-          // Add Translation Button
-          if (buttonVisibility['addTranslation']!)
-            Positioned(
-              right: 20,
-              bottom: 160,
-              child: FloatingActionButton(
-                heroTag: 'addTranslation',
-                onPressed: () {
-                  _showAddTranslationDialog();
-                },
-                child: Icon(Icons.translate),
-                backgroundColor: Colors.white.withOpacity(0.5),
-              ),
-            ),
-          // Show Translation Button
-          if (buttonVisibility['showTranslation']!)
-            Positioned(
-              right: 20,
-              top: 20,
-              child: FloatingActionButton(
-                heroTag: 'showTranslation',
-                onPressed: () {
-                  if (words[currentIndex].translation.isNotEmpty) {
-                    setState(() {
-                      showTranslation = true;
-                      showSentence = false;
-                      isBlackBackground = true;
-                      _incrementScore(3); // Increment score by +3
-                    });
-                  }
-                },
-                child: Icon(Icons.visibility),
-                backgroundColor: Colors.white.withOpacity(0.5),
-              ),
-            ),
-          // Show Sentence Button
-          if (buttonVisibility['showSentence']!)
-            Positioned(
-              right: 20,
-              top: 90,
-              child: FloatingActionButton(
-                heroTag: 'showSentence',
-                onPressed: () {
-                  if (words[currentIndex].sentences.isNotEmpty) {
-                    setState(() {
-                      showSentence = true;
-                      showTranslation = false;
-                      isBlackBackground = true;
-                      _incrementScore(1); // Increment score by +1
-                      _advanceSentenceIndex();
-                    });
-                  }
-                },
-                child: Icon(Icons.more_horiz),
-                backgroundColor: Colors.white.withOpacity(0.5),
-              ),
-            ),
-          // Settings Button
-          Positioned(
-            left: 20,
-            bottom: 20,
-            child: FloatingActionButton(
-              heroTag: 'settings',
-              onPressed: () {
-                _showSettingsDialog();
-              },
-              child: Icon(Icons.settings),
-              backgroundColor: Colors.white.withOpacity(0.5),
-            ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+        floatingActionButton: null);
   }
 
   void _advanceSentenceIndex() {
