@@ -302,8 +302,8 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
             // Add Translation Button
             if (buttonVisibility['addTranslation']!)
               Positioned(
-                right: 20,
-                bottom: 160,
+                right: 90,
+                bottom: 20,
                 child: FloatingActionButton(
                   heroTag: 'addTranslation',
                   onPressed: () {
