@@ -94,7 +94,6 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
 
   Future<File> _getLocalFile() async {
     final directory = await getApplicationDocumentsDirectory();
-    print('${directory.path}/words.json');
     return File('${directory.path}/words.json');
   }
 
@@ -209,7 +208,6 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
     }
 
     // Reset the score and current sentence index of the current word
-    print(words[currentIndex].score);
     words[currentIndex].score = min(words[currentIndex].score - 2, 1);
     words[currentIndex].currentSentenceIndex = 0;
 
@@ -484,51 +482,70 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
         return AlertDialog(
           title: Text("Settings"),
           content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Language selection (only Romanian supported)
-                ListTile(
-                  title: Text('Learning Language'),
-                  subtitle: Text('Romanian'),
-                ),
-                // Button toggles
-                SwitchListTile(
-                  title: Text('Show Add Word Button'),
-                  value: buttonVisibility['addWord']!,
-                  onChanged: (value) {
-                    _toggleButtonVisibility('addWord');
-                  },
-                ),
-                SwitchListTile(
-                  title: Text('Show Add Sentence Button'),
-                  value: buttonVisibility['addSentence']!,
-                  onChanged: (value) {
-                    _toggleButtonVisibility('addSentence');
-                  },
-                ),
-                SwitchListTile(
-                  title: Text('Show Add Translation Button'),
-                  value: buttonVisibility['addTranslation']!,
-                  onChanged: (value) {
-                    _toggleButtonVisibility('addTranslation');
-                  },
-                ),
-                SwitchListTile(
-                  title: Text('Show Translation Button'),
-                  value: buttonVisibility['showTranslation']!,
-                  onChanged: (value) {
-                    _toggleButtonVisibility('showTranslation');
-                  },
-                ),
-                SwitchListTile(
-                  title: Text('Show Sentence Button'),
-                  value: buttonVisibility['showSentence']!,
-                  onChanged: (value) {
-                    _toggleButtonVisibility('showSentence');
-                  },
-                ),
-              ],
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setStateDialog) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Language selection (only Romanian supported)
+                    ListTile(
+                      title: Text('Learning Language'),
+                      subtitle: Text('Romanian'),
+                    ),
+                    // Button toggles
+                    SwitchListTile(
+                      title: Text('Show Add Word Button'),
+                      value: buttonVisibility['addWord']!,
+                      onChanged: (value) {
+                        setState(() {
+                          _toggleButtonVisibility('addWord');
+                        });
+                        setStateDialog(() {}); // Update the dialog's UI
+                      },
+                    ),
+                    SwitchListTile(
+                      title: Text('Show Add Sentence Button'),
+                      value: buttonVisibility['addSentence']!,
+                      onChanged: (value) {
+                        setState(() {
+                          _toggleButtonVisibility('addSentence');
+                        });
+                        setStateDialog(() {}); // Update the dialog's UI
+                      },
+                    ),
+                    SwitchListTile(
+                      title: Text('Show Add Translation Button'),
+                      value: buttonVisibility['addTranslation']!,
+                      onChanged: (value) {
+                        setState(() {
+                          _toggleButtonVisibility('addTranslation');
+                        });
+                        setStateDialog(() {}); // Update the dialog's UI
+                      },
+                    ),
+                    SwitchListTile(
+                      title: Text('Show Translation Button'),
+                      value: buttonVisibility['showTranslation']!,
+                      onChanged: (value) {
+                        setState(() {
+                          _toggleButtonVisibility('showTranslation');
+                        });
+                        setStateDialog(() {}); // Update the dialog's UI
+                      },
+                    ),
+                    SwitchListTile(
+                      title: Text('Show Sentence Button'),
+                      value: buttonVisibility['showSentence']!,
+                      onChanged: (value) {
+                        setState(() {
+                          _toggleButtonVisibility('showSentence');
+                        });
+                        setStateDialog(() {}); // Update the dialog's UI
+                      },
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           actions: <Widget>[
