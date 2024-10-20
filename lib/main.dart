@@ -4,6 +4,8 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'dart:math';
+import 'package:file_picker/file_picker.dart'; // Import the file_picker package
+import 'package:flutter/services.dart'; // For handling platform exceptions
 
 void main() {
   runApp(LanguageLearningApp());
@@ -90,6 +92,132 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
   void initState() {
     super.initState();
     _loadWords();
+  }
+
+  /// Export the current word data to a JSON file
+  Future<void> _exportWordData() async {
+    try {
+      // Convert the words list to JSON
+      String jsonContent =
+          json.encode(words.map((word) => word.toJson()).toList());
+
+      // Let the user choose where to save the file
+      String? outputFilePath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Export Word Data',
+        fileName: 'word_data_${DateTime.now().millisecondsSinceEpoch}.json',
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (outputFilePath != null) {
+        File file = File(outputFilePath);
+        await file.writeAsString(jsonContent);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Word data exported successfully!')),
+        );
+      } else {
+        // User canceled the picker
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export canceled.')),
+        );
+      }
+    } catch (e) {
+      // Handle any errors during export
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to export word data: $e')),
+      );
+    }
+  }
+
+  /// Import word data from a JSON file
+  Future<void> _importWordData() async {
+    try {
+      // Let the user select a JSON file
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        dialogTitle: 'Import Word Data',
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        String importFilePath = result.files.single.path!;
+        File importFile = File(importFilePath);
+        String fileContent = await importFile.readAsString();
+
+        // Parse the JSON content
+        List<dynamic> jsonData = json.decode(fileContent);
+
+        // Convert JSON data to List<Word>
+        List<Word> importedWords =
+            jsonData.map((e) => Word.fromJson(e)).toList();
+
+        // Confirm with the user before replacing existing data
+        bool? confirm = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Confirm Import"),
+              content: Text(
+                  "Importing will replace your current word data. Continue?"),
+              actions: <Widget>[
+                TextButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                TextButton(
+                  child: Text("Import"),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+
+        if (confirm != null && confirm) {
+          setState(() {
+            words = importedWords;
+            currentIndex = 0;
+            currentBackgroundColor = _getBackgroundColor();
+            showTranslation = false;
+            showSentence = false;
+            isBlackBackground = false;
+          });
+          _saveWords(); // Save the imported data
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Word data imported successfully!')),
+          );
+        } else {
+          // User canceled the import
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Import canceled.')),
+          );
+        }
+      } else {
+        // User canceled the picker
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Import canceled.')),
+        );
+      }
+    } on FormatException catch (e) {
+      // Handle JSON format errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Invalid JSON format: $e')),
+      );
+    } on PlatformException catch (e) {
+      // Handle platform-specific errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Platform error: $e')),
+      );
+    } catch (e) {
+      // Handle any other errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to import word data: $e')),
+      );
+    }
   }
 
   Future<File> _getLocalFile() async {
@@ -542,6 +670,44 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                         });
                         setStateDialog(() {}); // Update the dialog's UI
                       },
+                    ),
+                    Divider(), // Add a divider for separation
+                    // per-user I/O word data
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          'Manage Word Data',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton.icon(
+                          icon: Icon(Icons.file_upload),
+                          label: Text("Export"),
+                          onPressed: () async {
+                            Navigator.of(context)
+                                .pop(); // Close the settings dialog
+                            await _exportWordData();
+                          },
+                        ),
+                        ElevatedButton.icon(
+                          icon: Icon(Icons.file_download),
+                          label: Text("Import"),
+                          onPressed: () async {
+                            Navigator.of(context)
+                                .pop(); // Close the settings dialog
+                            await _importWordData();
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 );
