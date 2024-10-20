@@ -104,7 +104,6 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
         List<dynamic> jsonData = json.decode(contents);
         setState(() {
           words = jsonData.map((e) => Word.fromJson(e)).toList();
-          _resetScores();
           currentBackgroundColor = _getBackgroundColor();
         });
       }
@@ -160,13 +159,6 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
     });
   }
 
-  void _resetScores() {
-    for (var word in words) {
-      word.score = 0;
-    }
-    _saveWords();
-  }
-
   Color _getBackgroundColor() {
     int colorIndex = (currentIndex ~/ 3) % backgroundColors.length;
     return backgroundColors[colorIndex];
@@ -215,7 +207,7 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
     }
 
     // Reset the score and current sentence index of the current word
-    words[currentIndex].score = 0;
+    words[currentIndex].score = words[currentIndex].score - 2;
     words[currentIndex].currentSentenceIndex = 0;
 
     // Update the background color and reset views
