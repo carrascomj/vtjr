@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
@@ -93,6 +94,7 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
 
   Future<File> _getLocalFile() async {
     final directory = await getApplicationDocumentsDirectory();
+    print('${directory.path}/words.json');
     return File('${directory.path}/words.json');
   }
 
@@ -207,7 +209,8 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
     }
 
     // Reset the score and current sentence index of the current word
-    words[currentIndex].score = words[currentIndex].score - 2;
+    print(words[currentIndex].score);
+    words[currentIndex].score = min(words[currentIndex].score - 2, 1);
     words[currentIndex].currentSentenceIndex = 0;
 
     // Update the background color and reset views
@@ -252,9 +255,10 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                 child: Center(
                   child: Text(
                     displayText,
-                    style: TextStyle(
-                      fontSize: 32,
+                    style: GoogleFonts.sniglet(
+                      fontSize: 42,
                       color: isBlackBackground ? Colors.white : Colors.black,
+                      fontWeight: FontWeight.w600,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -271,8 +275,12 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                   onPressed: () {
                     _showAddWordDialog();
                   },
+                  shape: CircleBorder(),
+                  backgroundColor: Colors.black.withOpacity(0.6),
+                  foregroundColor: Colors.white,
+                  focusColor: Colors.black,
+                  splashColor: Colors.black,
                   child: Icon(Icons.add),
-                  backgroundColor: Colors.white.withOpacity(0.5),
                 ),
               ),
             // Add Sentence Button
@@ -285,8 +293,12 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                   onPressed: () {
                     _showAddSentenceDialog();
                   },
-                  child: Icon(Icons.edit),
-                  backgroundColor: Colors.white.withOpacity(0.5),
+                  shape: CircleBorder(),
+                  backgroundColor: Colors.black.withOpacity(0.6),
+                  foregroundColor: Colors.white,
+                  focusColor: Colors.black,
+                  splashColor: Colors.black,
+                  child: const Icon(Icons.edit),
                 ),
               ),
             // Add Translation Button
@@ -299,8 +311,12 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                   onPressed: () {
                     _showAddTranslationDialog();
                   },
+                  shape: CircleBorder(),
+                  backgroundColor: Colors.black.withOpacity(0.6),
+                  foregroundColor: Colors.white,
+                  focusColor: Colors.black,
+                  splashColor: Colors.black,
                   child: Icon(Icons.translate),
-                  backgroundColor: Colors.white.withOpacity(0.5),
                 ),
               ),
             // Show Translation Button
@@ -320,8 +336,12 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                       });
                     }
                   },
+                  shape: CircleBorder(),
+                  backgroundColor: Colors.pinkAccent,
+                  foregroundColor: Colors.black,
+                  focusColor: Colors.pink,
+                  splashColor: Colors.pink,
                   child: Icon(Icons.visibility),
-                  backgroundColor: Colors.white.withOpacity(0.5),
                 ),
               ),
             // Show Sentence Button
@@ -342,8 +362,12 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                       });
                     }
                   },
+                  shape: CircleBorder(),
+                  backgroundColor: Colors.lime,
+                  foregroundColor: Colors.black,
+                  focusColor: Colors.pink,
+                  splashColor: Colors.pink,
                   child: Icon(Icons.more_horiz),
-                  backgroundColor: Colors.white.withOpacity(0.5),
                 ),
               ),
             // Settings Button
@@ -355,8 +379,12 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                 onPressed: () {
                   _showSettingsDialog();
                 },
+                shape: CircleBorder(),
+                backgroundColor: Colors.black.withOpacity(0.6),
+                foregroundColor: Colors.white,
+                focusColor: Colors.black,
+                splashColor: Colors.black,
                 child: const Icon(Icons.settings),
-                backgroundColor: Colors.white.withOpacity(0.5),
               ),
             ),
           ],
