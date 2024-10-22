@@ -399,7 +399,7 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                 child: Center(
                   child: Text(
                     displayText,
-                    style: GoogleFonts.sniglet(
+                    style: GoogleFonts.arima(
                       fontSize: 42,
                       color: isBlackBackground ? Colors.white : Colors.black,
                       fontWeight: FontWeight.w600,
