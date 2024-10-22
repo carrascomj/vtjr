@@ -21,6 +21,24 @@ class LanguageLearningApp extends StatelessWidget {
   }
 }
 
+/// The kind of input text that a user may introduce.
+enum TextKind {
+  word,
+  sentence,
+  translation;
+
+  @override
+  String toString() {
+    return (this == TextKind.word)
+        ? "Word"
+        : (this == TextKind.sentence)
+            ? "Sentence"
+            : "Translation";
+  }
+}
+
+/// Central class to hold language information in the app
+/// that is de/serialize from a file.
 class Word {
   String word;
   List<String> sentences;
@@ -70,12 +88,11 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
   int currentIndex = 0;
   List<Color> backgroundColors = [
     Colors.red,
-    Color(0xFF01a804), // Saturated green
     Colors.yellow,
     Colors.blue,
     Colors.orange,
   ];
-  Color currentBackgroundColor = Color(0xFF01a804); // Initial background color
+  Color currentBackgroundColor = Colors.red; // Initial background color
   bool showTranslation = false;
   bool showSentence = false;
   bool isBlackBackground = false;
@@ -90,6 +107,7 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
 
   @override
   void initState() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     super.initState();
     _loadWords();
   }
@@ -399,7 +417,7 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                 child: FloatingActionButton(
                   heroTag: 'addWord',
                   onPressed: () {
-                    _showAddWordDialog();
+                    _showInputDialog(TextKind.word);
                   },
                   shape: CircleBorder(),
                   backgroundColor: Colors.black.withOpacity(0.6),
@@ -417,7 +435,7 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                 child: FloatingActionButton(
                   heroTag: 'addSentence',
                   onPressed: () {
-                    _showAddSentenceDialog();
+                    _showInputDialog(TextKind.sentence);
                   },
                   shape: CircleBorder(),
                   backgroundColor: Colors.black.withOpacity(0.6),
@@ -435,7 +453,7 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                 child: FloatingActionButton(
                   heroTag: 'addTranslation',
                   onPressed: () {
-                    _showAddTranslationDialog();
+                    _showInputDialog(TextKind.translation);
                   },
                   shape: CircleBorder(),
                   backgroundColor: Colors.black.withOpacity(0.6),
@@ -525,82 +543,36 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
     _saveWords();
   }
 
-  void _showAddWordDialog() {
+  Future<void> _showInputDialog(TextKind textKind) async {
     TextEditingController wordController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Add New Word"),
-          content: TextField(
-            controller: wordController,
-            decoration: InputDecoration(hintText: "Enter a new word"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text("Add"),
-              onPressed: () {
-                _addNewWord(wordController.text);
-                Navigator.of(context).pop();
-              },
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Add ${textKind.toString()}"),
+            content: TextField(
+              controller: wordController,
+              decoration: InputDecoration(
+                  hintText:
+                      "Enter ${textKind.toString().toLowerCase()} here..."),
             ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showAddSentenceDialog() {
-    TextEditingController sentenceController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Add Sentence"),
-          content: TextField(
-            controller: sentenceController,
-            decoration: InputDecoration(hintText: "Enter a sentence"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text("Add"),
-              onPressed: () {
-                _addSentence(sentenceController.text);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showAddTranslationDialog() {
-    TextEditingController translationController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Add Translation"),
-          content: TextField(
-            controller: translationController,
-            decoration: InputDecoration(hintText: "Enter the translation"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text("Add"),
-              onPressed: () {
-                _addTranslation(translationController.text);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+            actions: <Widget>[
+              TextButton(
+                child: Text("Add"),
+                onPressed: () {
+                  textKind == TextKind.word
+                      ? _addNewWord(wordController.text)
+                      : textKind == TextKind.sentence
+                          ? _addSentence(wordController.text)
+                          : _addTranslation(wordController.text);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
+    // Reapply immersive mode after dialog is closed
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   }
 
   void _showSettingsDialog() {
