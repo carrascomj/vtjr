@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:math';
 import 'package:file_picker/file_picker.dart'; // Import the file_picker package
 import 'package:flutter/services.dart'; // For handling platform exceptions
+import 'llm_manager.dart';
 
 void main() {
   runApp(LanguageLearningApp());
@@ -96,6 +97,7 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
   bool showTranslation = false;
   bool showSentence = false;
   bool isBlackBackground = false;
+  bool isExplaining = false;
   String learnedLanguage = 'ro'; // Romanian
   Map<String, bool> buttonVisibility = {
     'addWord': true,
@@ -103,7 +105,100 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
     'addTranslation': true,
     'showSentence': true,
     'showTranslation': true,
+    'explainUsage': true,
   };
+  Future<void> _handleExplainUsage() async {
+    if (words.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No words available.')),
+      );
+      return;
+    }
+
+    Word currentWord = words[currentIndex];
+
+    String sentence = '';
+    if (showSentence && currentWord.sentences.isNotEmpty) {
+      sentence = currentWord.sentences[currentWord.currentSentenceIndex];
+    } else if (currentWord.translation.isNotEmpty && showTranslation) {
+      sentence = currentWord.translation;
+    } else {
+      sentence = currentWord.word;
+    }
+
+    if (sentence.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No sentence available for explanation.')),
+      );
+      return;
+    }
+
+    setState(() {
+      isExplaining = true;
+    });
+
+    // Show loading indicator
+    // await showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (context) {
+    //     return Center(
+    //       child: CircularProgressIndicator(),
+    //     );
+    //   },
+    // );
+
+    try {
+      print("Build the explanation!");
+      String explanation =
+          await LLMManager().generateExplanation(sentence, currentWord.word);
+
+      // Close the loading indicator
+      Navigator.of(context).pop();
+
+      // Show the explanation in a dialog
+      await _showCustomDialog(
+        AlertDialog(
+          title: Text("Explanation for \"$sentence\""),
+          content: SingleChildScrollView(
+            child: Text(
+              explanation,
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      print("Error: $e");
+      // Close the loading indicator
+      Navigator.of(context).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to generate explanation: $e')),
+      );
+    } finally {
+      setState(() {
+        isExplaining = false;
+      });
+    }
+  }
+
+  Future<void> _showCustomDialog(Widget dialog) async {
+    await showDialog(
+      context: context,
+      builder: (context) => dialog,
+    );
+    // Reapply immersive mode after dialog is closed
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  }
 
   @override
   void initState() {
@@ -514,6 +609,25 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                   child: Icon(Icons.more_horiz),
                 ),
               ),
+            if (buttonVisibility['explainUsage'] != null &&
+                buttonVisibility['explainUsage']! &&
+                showSentence)
+              Positioned(
+                left: 20,
+                top: 20,
+                child: FloatingActionButton(
+                  heroTag: 'explainUsage',
+                  onPressed: () {
+                    _handleExplainUsage();
+                  },
+                  shape: CircleBorder(),
+                  backgroundColor: Colors.yellow,
+                  foregroundColor: Colors.black,
+                  focusColor: Colors.blue,
+                  splashColor: Colors.blue,
+                  child: Icon(Icons.lightbulb_sharp),
+                ),
+              ),
             // Settings Button
             Positioned(
               left: 20,
@@ -641,6 +755,16 @@ class _LanguageLearningHomePageState extends State<LanguageLearningHomePage> {
                           _toggleButtonVisibility('showSentence');
                         });
                         setStateDialog(() {}); // Update the dialog's UI
+                      },
+                    ),
+                    SwitchListTile(
+                      title: Text('Show AI Button'),
+                      value: buttonVisibility['explainUsage']!,
+                      onChanged: (value) {
+                        setState(() {
+                          _toggleButtonVisibility('explainUsage');
+                        });
+                        setStateDialog(() {}); // Update the AI UI button
                       },
                     ),
                     Divider(), // Add a divider for separation

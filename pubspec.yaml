@@ -31,12 +31,14 @@ dependencies:
   flutter:
     sdk: flutter
   path_provider: ^2.1.4
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
+  http: ^1.2.2
   file_picker: ^8.1.3
+  llama_cpp_dart:
+    path: ../llama_cpp_dart
 
 dev_dependencies:
   flutter_test:
@@ -93,6 +95,7 @@ flutter:
   # see https://flutter.dev/to/font-from-package
   assets:
     - assets/logo.png
+    - assets/models/tinyllama-2-1b-miniguanaco.Q3_K_L.gguf
 
 
 flutter_launcher_icons:
